@@ -1,4 +1,165 @@
 
+/**
+ * 팀 리그 class 만들기
  */
 public class Z01_TestTeam {
+	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		League l = new League("------KBL------");
+		l.teams[0] = new Team("삼성라이온즈", "수원");
+		l.teams[1] = new Team("기아타이거즈", "광주");
+		l.teams[2] = new Team("롯데자이언츠", "부산");
+		l.teams[3] = new Team("NC다이노즈", "창원");
+		
+		l.match("삼성라이온즈", "기아타이거즈");
+		l.match("삼성라이온즈", "롯데자이언츠");
+		l.match("롯데자이언츠", "NC다이노즈");
+		l.match("NC다이노즈", "롯데자이언츠");
+		
+		//l.printLeague();	// 리그정보 출력
+		l.viewAllRanking();
+		
+		l.viewRanking("롯데자이언츠");
+		
+		
+	} // end of main
+} // end of class
+
+
+class League {
+	/** 리그명 */
+	String nameLeague = "";
+	/** 리그 참여팀 */
+	Team teams[] = new Team[4];	//팀의 총개수를 4개로 지정
+	
+	League() {
+	}
+	League(String nameLeague) {
+		this.nameLeague = nameLeague;
+	}
+	League(String nameLeague, Team[] teams) {	//팀명과 팀배열을 받음
+		this.nameLeague = nameLeague;
+		this.teams = teams;
+	}
+	
+	/** 경기 진행 */
+	void match(String namewin, String namelose) {
+		int winIndex = -1;
+		int loseIndex = -1;
+		// 이긴팀, 진팀의 이름이 팀 배열에 존재하는지 확인
+		for (int i = 0; i < teams.length; i++) {
+			if(teams[i].name.equals(namewin)){
+				winIndex = i;
+			}
+			if (teams[i].name.equals(namelose)) {
+				loseIndex = i;
+			}
+		}
+		// 팀명을 찾았는지 확인 -> 찾은 경우에만 match 진행
+		if (winIndex == -1 || loseIndex == -1) {	//팀이 없는 경우
+			System.out.println("팀목록에 없습니다. 팀명을 확인하세요");
+		} else {	// 이긴팀, 진팀 모두 찾은 경우
+			teams[winIndex].game(true);
+			teams[loseIndex].game(false);
+		}
+	}
+	/** 팀을 승률기준으로 내림차순 정렬 메서드 - 선택정렬*/
+	void sortTeam() {
+		for (int i = 0; i < teams.length; i++) {
+			int maxIndex = i;	//최대값의 index를 저장할 변수
+			for (int j = i+1; j < teams.length; j++) {
+				if(teams[maxIndex].winningRate() < teams[j].winningRate()){
+					maxIndex = j;
+				}
+			}
+			//maxIndex <-> i(비교범의의 첫번째값) 교환
+			Team temp = teams[maxIndex];
+			teams[maxIndex] = teams[i];
+			teams[i] = temp;
+		}
+	}
+	/** 팀순위(전체팀 내림차순 출력) */
+	void viewAllRanking() {
+		sortTeam();// 내림차순 정렬 - 선택정렬
+		for (int i = 0; i < teams.length; i++) {
+			// 정렬된 순서대로 팀정보 출력 printTeam()
+			System.out.print("["+(i+1)+"등]");
+			teams[i].printTeam();
+		}
+		
+	}
+	/** 팀순위(조회할팀명)-정보출력 */
+	void viewRanking(String name) {
+		sortTeam();// 내림차순 정렬
+		// 팀이 존재하는지 체크
+		int index = -1;
+		for (int i = 0; i < teams.length; i++) {
+			if (teams[i].name.equals(name)) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) {	//못찾음
+			System.out.println("팀목록에 업습니다. 팀명을 확인하세요");
+		} else {	// 팀명 있는경우
+			// 팀순위 + 팀의 정보출력 printTeam()
+			System.out.println("["+(index+1)+"등]");
+			teams[index].printTeam();
+		}
+	}
+	/** 리그정보 출력(리그명,참여팀목록,참여팀수) */
+	void printLeague() {
+		System.out.println("리그명 : "+nameLeague);
+		System.out.println("참여팀수 : "+teams.length);
+		for (int i = 0; i < teams.length; i++) {
+			System.out.println(teams[i].name);
+		}
+	}
+} // end of class
+
+
+
+
+class Team {
+	/** 팀명 */
+	String name = "";
+	/** 총경기수 */
+	int numOfGame = 0;
+	/** 이긴 경기수 */
+	int numOfWinGame = 0;
+	/** 연고지 */
+	String hometown = "";
+
+	Team(){
+	}
+	Team(String name, String hometown){
+		this.name = name;	this.hometown = hometown;
+	}
+	
+	/** true승 false패 */
+	void game(boolean result){
+//		if (result == true){
+//			numOfGame++;
+//			numOfWinGame++;
+//			System.out.println("승");
+//		} else {
+//			numOfGame++;
+//			System.out.println("패");
+//		}
+		numOfGame++;
+		numOfWinGame += result ? 1 : 0;
+	}
+	/** 승률 리턴 */
+	double winningRate() {
+		return (double)numOfWinGame/numOfGame;
+	}
+	/** 팀 정보 출력 */
+	void printTeam() {
+		System.out.println("팀명 : "+name);
+		System.out.println("총경기수 : "+numOfGame);
+		System.out.println("이긴경기수 : "+numOfWinGame);
+		System.out.println("패한경기수 : "+(numOfGame-numOfWinGame));
+		System.out.printf("승률  : %.1f%%\n", winningRate()*100);
+		System.out.println("연고지 : "+hometown);
+	}
+} // end of class
